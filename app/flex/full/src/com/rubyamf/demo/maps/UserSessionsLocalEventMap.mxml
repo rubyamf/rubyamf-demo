@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<LocalEventMap 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+    xmlns="http://mate.asfusion.com/"
+	xmlns:business="com.rubyamf.demo.business.*"
+    cache="global">
+    
+    <!-- Script ____________________________________________________________ -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.business.RemoteService;
+	import com.rubyamf.demo.events.PayloadEvent;
+	import com.rubyamf.demo.managers.UserSessionsManager;
+	import com.rubyamf.demo.views.components.SessionUI;
+	import com.rubyamf.demo.views.models.UserSessionsViewModel;
+	
+	import mx.events.FlexEvent;
+	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	
+    <!-- Services __________________________________________________________ -->
+    <business:Services id="services"/>
+    
+    <!-- FlexEvent.PREINITIALIZE ___________________________________________ --> 
+    <EventHandlers type="{FlexEvent.PREINITIALIZE}" debug="true">
+		<ObjectBuilder generator="{UserSessionsManager}">
+            <Properties dispatcher="{scope.dispatcher}"/>
+			<Properties service="{services.userSessionsService}"/>
+        </ObjectBuilder>
+		<EventAnnouncer generator="{PayloadEvent}"
+					    constructorArguments="{[PayloadEvent.CALL, 'show']}"/>
+    </EventHandlers> 
+	
+	<!-- FlexEvent.APPLICATION_COMPLETE ____________________________________ --> 
+	<!-- Call the show method to check if a current session exists and 
+	     automatically set the application as logged in if the browser has a 
+	     current session and user refreshes the application. -->
+	<EventHandlers type="{FlexEvent.APPLICATION_COMPLETE}" debug="true">
+		<EventAnnouncer generator="{PayloadEvent}"
+						constructorArguments="{[PayloadEvent.CALL, 'show']}"/>
+	</EventHandlers> 
+	
+	<!-- PayloadEvent.CALL _________________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.CALL}" debug="true">
+		<AsyncMethodInvoker generator="{RemoteService}"
+							method="call"
+							cache="local"
+							arguments="{event.data}"
+							successType="{ResultEvent.RESULT}"
+							faultType="{FaultEvent.FAULT}" 
+							debug="true">
+			<Properties service="{services.userSessionsService}"/>
+			<Properties showBusyCursor="{true}"/>
+			<successHandlers>
+				<MethodInvoker generator="{UserSessionsManager}"
+							   method="callResult"
+							   arguments="{currentEvent}"/>
+			</successHandlers>
+			<faultHandlers >
+				<MethodInvoker generator="{UserSessionsManager}"
+							   method="callFault" 
+							   arguments="{currentEvent}"/>
+			</faultHandlers>
+		</AsyncMethodInvoker>
+	</EventHandlers>
+	
+    <!-- PayloadEvent.EXECUTE ______________________________________________ -->   
+    <EventHandlers type="{PayloadEvent.EXECUTE}" debug="true">
+        <MethodInvoker generator="{UserSessionsManager}"
+                       method="execute"
+                       arguments="{event}"/>
+    </EventHandlers>
+
+    <!-- View Injectors ____________________________________________________ -->
+    <Injectors target="{SessionUI}" debug="true">
+        <ObjectBuilder generator="{UserSessionsViewModel}"  
+                       registerTarget="true"/>
+        <PropertyInjector targetKey="model" 
+                          source="{lastReturn}"/>
+    </Injectors>
+	
+	<!-- View Model Injectors ______________________________________________ -->
+	<Injectors target="{UserSessionsViewModel}" debug="true">
+        <PropertyInjector targetKey="dispatcher"
+						  source="{scope.dispatcher}"/>
+		<PropertyInjector targetKey="visible"
+						  source="{UserSessionsManager}"
+						  sourceKey="modelVisible"/>
+    </Injectors> 
+</fx:Declarations>
+	
+</LocalEventMap>

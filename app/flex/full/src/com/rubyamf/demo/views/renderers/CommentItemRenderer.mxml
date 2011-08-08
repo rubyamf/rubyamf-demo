@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- The PostRenderer applies styles easily for rendering posts. -->
+<renderers:GroupItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:renderers="com.rubyamf.demo.views.renderers.*"
+							 creationComplete="edbAction.deleteOnly = true;">
+	
+	<!-- Define Script _____________________________________________________ --> 
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.events.PayloadEventKind;
+	
+	import flashx.textLayout.elements.ParagraphElement;
+	import flashx.textLayout.elements.SpanElement;
+	
+	import mx.formatters.DateFormatter;
+	import mx.resources.IResourceManager;
+	import mx.resources.ResourceManager;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Class variables
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	protected static var df:DateFormatter = new function():DateFormatter {
+		
+		//Call this here since does not exist during creation.
+		var resourceManager:IResourceManager = ResourceManager.getInstance();
+		var formatter:DateFormatter = new DateFormatter();
+		
+		formatter.formatString = resourceManager.getString('FormattingValues', 
+			'DATE_FORMAT');
+		
+		var timeFormat:String = resourceManager.getString('FormattingValues', 
+			'TIME_FORMAT');
+		
+		//Hack if localization not set up
+		if (timeFormat == null)
+			formatter.formatString += " L:NN A";
+		
+		return formatter;
+	};
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Overridden properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  hasHandCursor
+	//----------------------------------
+	
+	/**
+	 * @inheritDoc.
+	 */
+	override public function get hasHandCursor():Boolean
+	{
+		return false;
+	}
+	
+	//----------------------------------
+	//  title
+	//----------------------------------
+	
+	/**
+	 * @inheritDoc
+	 */
+	override public function get title():String
+	{
+		return data.name + ", ";
+	}
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Overridden methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @inheritDoc
+	 */
+	override protected function buildTitleParagraph():ParagraphElement
+	{
+		var paragraph:ParagraphElement = super.buildTitleParagraph();
+		var span:SpanElement = new SpanElement();
+		
+		span.text = " posted: " + df.format(data.createdAt);
+		span.color = getStyle("timestampColor");
+		paragraph.addChild(span)
+		
+		return paragraph;
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	override protected function editTitle(value:Object):String
+	{
+		return value.name + " comment posted on " + df.format(value.createdAt);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	override protected function reportAction(value:String):void
+	{
+		//Not drilling down on a comment.
+		if (value == PayloadEventKind.SHOW)
+			return;
+		
+		super.reportAction(value);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	override protected function updateContentSpan(applyLimit:Boolean=true):void
+	{
+		//We dont' truncate the length.
+		super.updateContentSpan(false);
+	}
+	
+]]>
+</fx:Script>
+</renderers:GroupItemRenderer>

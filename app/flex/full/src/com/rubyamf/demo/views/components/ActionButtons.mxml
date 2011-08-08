@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  verticalAlign="middle"
+		  gap="2"
+		  width="35">
+	
+	
+	<!-- Define Metadata __________________________________________________  -->
+<fx:Metadata>
+	[Event(name="edit")]
+	[Event(name="delete")]
+</fx:Metadata>
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.views.models.interfaces.AViewModel;
+	
+	[Bindable]
+	/**
+	 * The value of the edit toolTip.
+	 */
+	public var deleteToolTip:String = "Delete";
+	
+	[Bindable]
+	/**
+	 * The value of the edit toolTip.
+	 */
+	public var editToolTip:String = "Edit";
+	
+	[Bindable]
+	/**
+	 * Whether the only option is to delete a record.
+	 */
+	public var deleteOnly:Boolean = false;
+	
+	/**
+	 * @private
+	 */
+	private function reportEvent(type:String, event:MouseEvent):void
+	{
+		var actionEvent:MouseEvent = new MouseEvent(type, event.bubbles, 
+			event.cancelable, event.localX, event.localY, event.relatedObject,
+			event.ctrlKey, event.altKey, event.shiftKey, event.buttonDown, 
+			event.delta);
+		
+		dispatchEvent(actionEvent);
+	}
+	
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:Image width="16" height="16"
+			 source="{getStyle('editButton')}"
+			 visible="{!deleteOnly}"
+			 includeInLayout="{!deleteOnly}"
+			 buttonMode="true"
+			 toolTip="{editToolTip}"
+			 mouseChildren="false"
+			 useHandCursor="true"
+			 click="reportEvent('edit', event);"/>
+	<mx:Image width="16" height="16"
+			 source="{getStyle('deleteButton')}"
+			 buttonMode="true"
+			 mouseChildren="false"
+			 useHandCursor="true"
+			 toolTip="{deleteToolTip}"
+			 click="reportEvent('delete', event);"/>
+</s:HGroup>

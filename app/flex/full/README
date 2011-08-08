@@ -1,0 +1,41 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//   IMPORTANT NOTE: If you change sdks, the html-template will be overwritten.
+//   Make sure to copy the contents of the template-backup folder into 
+//   html-template folder or the wrapper will not include javascript to update
+//   the size and scroll bars when the Flex swf content is taller than the 
+//   browser window.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+The demo Flex application, found in the app/flex folder, is structured around 
+the MVC pattern and uses Mate as the framework for its implementation. You can 
+find out more about Mate at http://mate.asfusion.com.
+
+Each UI view has an event map that process events and calls remote services. 
+It also injects properties into the views using a presentation model that is 
+itself injected with properties from the view's manager (controller). The 
+managers are instantiated and cached in the maps as well.
+
+The critical items for implementing RubyAMF in Flex/Flash are:
+
+  1. Remote Class aliasing on the classes and making sure the class is 
+     explicitly referenced in the Flex application (or it won't compile. 
+     See com.rubyamf.demo.business/Services.mxml).
+
+  2. Configuring the RemoteObjects to call the RubyAMF gateway.
+
+The com.rubyamf.demo.vos and com.rubyamf.demo.models classes show how the 
+remote class aliasing is set up for the related classes in the Rails backend. 
+Use the [Transient] tag in models for any client-side only object properties so 
+that they are not serialized and sent to the server.
+
+In order to understand how remote services are configured and called you need 
+to review the maps and also business/Services.mxml and the various config/*.xml 
+files. 
+
+Everything else in the application is just an example of a Mate MVC application. 
+If you want to debug and step through code based on interactions with the view 
+and calls to remote services, manager methods are the place to put your 
+breakpoints. The various CRUD methods in the managers are associated with 
+remote service results.

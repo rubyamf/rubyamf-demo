@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:comps="com.rubyamf.demo.views.components.*"
+				autoDrawBackground="true"
+				width="100%"
+			    dataChange="dataChangeHandler(event);"
+				creationComplete="onComplete();"
+				resize="onResize();">
+	
+	<!-- Define Metadata ___________________________________________________ --> 	
+<fx:Metadata>
+/**
+ * Name of the CSS Style declaration to use for the styles for title labels.
+ */
+[Style(name="titleStyleName", type="String", inherit="no")]
+</fx:Metadata>
+	
+	<!-- Define Script _____________________________________________________ --> 
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.views.models.interfaces.AViewModel;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.components.LinkedDataGroup;
+	
+	import flashx.textLayout.elements.ParagraphElement;
+	import flashx.textLayout.elements.SpanElement;
+	import flashx.textLayout.elements.TextFlow;
+	
+	import mx.binding.utils.BindingUtils;
+	import mx.formatters.DateFormatter;
+	import mx.resources.IResourceManager;
+	import mx.resources.ResourceManager;
+	
+	import spark.components.supportClasses.ItemRenderer;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Constants
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * The CUTOFF constant specifies the number of characters in the rendered
+	 * text to truncate to.
+	 */
+	public static const CUTOFF:int = 225;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Variables
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	protected var _contentSpan:SpanElement = new SpanElement();
+	
+	[Bindable]
+	/**
+	 * @private
+	 */
+	private var _hasEditLock:Boolean;
+	
+	/**
+	 * @private
+	 */
+	protected var _priorData:Object;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  contentSource
+	//----------------------------------
+	
+	/**
+	 * The content of the body text.
+	 */
+	public function get contentText():String
+	{
+		return data.detail;
+	}
+	
+	//----------------------------------
+	//  hasHandCursor
+	//----------------------------------
+	
+	/**
+	 * Whether to show a hand cursor when mousing over the renderer.
+	 */
+	public function get hasHandCursor():Boolean
+	{
+		return true;
+	}
+	
+	//----------------------------------
+	//  parentModel
+	//----------------------------------
+	
+	/**
+	 * References the parent view model of the renderer.
+	 */
+	public function get parentModel():AViewModel
+	{
+		if (parent!= null)
+		{
+			return LinkedDataGroup(parent).model;	
+			
+		} else {
+			
+			return null;
+		}
+	}
+	
+	//----------------------------------
+	//  title
+	//----------------------------------
+	
+	/**
+	 * The title to display.
+	 */
+	public function get title():String
+	{
+		return data.title;
+	}
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Protected methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * Builds a paragraph element to be rendered as the title.
+	 */
+	protected function buildTitleParagraph():ParagraphElement
+	{
+		var span:SpanElement = new SpanElement();
+		var paragraph:ParagraphElement = new ParagraphElement();
+		paragraph.paragraphSpaceAfter = 5;
+		
+		//Build the title paragraph
+		span.text = this.title;
+		
+		var titleStyleName:String = getStyle("titleStyleName");
+		
+		if (titleStyleName)
+		{
+			var css:CSSStyleDeclaration = 
+				styleManager.getMergedStyleDeclaration("." + titleStyleName);
+			if (css != null)
+			{
+				span.color = css.getStyle("color");
+				span.fontSize = css.getStyle("fontSize");
+				span.fontWeight = css.getStyle("fontWeight");
+			}
+		}
+		paragraph.addChild(span);
+		
+		return paragraph;
+	}
+	
+	/**
+	 * @private
+	 */
+	protected function dataChangeHandler(event:Event):Boolean
+	{
+		if (_priorData != data)
+		{
+			if (data == null)
+				return false;
+			
+			//Create the textFlow
+			var textFlow:TextFlow = new TextFlow();
+			var paragraph:ParagraphElement;
+			
+			//Use protected hook so other renderers can modify the title
+			//paragraph.
+			textFlow.addChild( buildTitleParagraph() );
+			
+			//Apply truncation to the content if it is too long and add 
+			//it to the TextFlow
+			updateContentSpan();
+			
+			paragraph = new ParagraphElement();
+			paragraph.addChild(_contentSpan);
+			textFlow.addChild(paragraph);
+			
+			_priorData = data;
+			
+			taDescription.textFlow =  textFlow;
+			return true;
+		} 
+		return false;
+	}
+	
+	/**
+	 * The edit title for tool tips.
+	 */
+	protected function editTitle(value:Object):String
+	{
+		return value.title;
+	}
+	
+	/**
+	 * @private
+	 */
+	protected function reportAction(value:String):void
+	{
+		if (!_hasEditLock)
+			parentModel.execute(data, value);
+	}
+	
+	/**
+	 * Updates the content and allows overriding to show all text versus the
+	 * default behavior that truncates the content length to CUTOFF.
+	 */
+	protected function updateContentSpan(applyLimit:Boolean = true):void
+	{
+		var content:String = contentText;
+		
+		if (content == null)
+		{
+			content = "";
+		}
+		
+		//Truncate the content
+		if (applyLimit)
+		{ 
+			if (CUTOFF > 0 && content.length > CUTOFF)
+			{	
+				content = content.slice(0, CUTOFF);
+				
+				//Here we make the content pretty
+				
+				//We first clear out multiple lines
+				var lines:Array = content.split("\n");
+				
+				if (lines.length > 1)
+					content = lines[0];
+				
+				//Next we determine if the last character is a period
+				if (content.charAt(content.length - 1) == ".")
+				{
+					//We strip the period
+					content = content.slice(0, content.length - 2) + " ...";
+					
+				} else if (content.charAt(content.length - 1) == " ") {
+					
+					//Last character is space so add dots
+					content = content + "...";
+					
+				} else {
+					
+					content = content + " ...";
+				}
+				
+			} else if (CUTOFF == 0 &&  content.length > CUTOFF) {
+				
+				//Completely hides the description.
+				content = "";
+			}
+		}
+		_contentSpan.text = content;
+	}
+	
+	/**
+	 * @private
+	 */
+	protected function updateSession(value:Boolean):void
+	{
+		var priorVisibility:Boolean = edbAction.visible;
+		
+		if (parentModel != null)
+			edbAction.visible = parentModel.editableFilter(data);
+		
+		//HACK to get texflow to resize 
+		if (priorVisibility != edbAction.visible)
+		{
+			taDescription.textFlow.invalidateAllFormats();
+			edbAction.invalidateSize();
+		}
+	}
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function onComplete():void
+	{
+		//Listen for session changes to update the action button visibility
+		BindingUtils.bindSetter(updateSession, this, 
+			["parent", "model", "hasSession"]);
+		
+		//Listen for changes in system-wide edit lock.
+		BindingUtils.bindSetter(updateEditLock, this, 
+			["parent", "model", "hasEditLock"]);
+	}
+	
+	/**
+	 * @private
+	 */
+	private function onResize():void
+	{
+		//HACK to get texflow to resize 
+		taDescription.textFlow.invalidateAllFormats();
+	}
+	
+	/**
+	 * @private
+	 */
+	private function updateEditLock(value:Boolean):void
+	{
+		_hasEditLock = value;
+	}
+
+]]>
+</fx:Script>
+	
+	<!-- Define GUI ________________________________________________________ --> 
+	<s:HGroup id="hgAction" width="100%" gap="2" verticalAlign="top">
+		<s:RichText id="taDescription" width="100%"
+					paddingTop="5"
+					paddingLeft="5"
+					paddingBottom="5"
+					paddingRight="5"
+					mouseChildren="{!hasHandCursor}"
+					buttonMode="{hasHandCursor}"
+					useHandCursor="{hasHandCursor}"
+					click="reportAction(PayloadEventKind.SHOW);"
+					resize="onResize();"/>
+		<comps:ActionButtons id="edbAction"
+							 enabled="{!_hasEditLock}"
+							 deleteToolTip="{'Delete ' + editTitle(data)}"
+							 editToolTip="{'Edit ' + editTitle(data)}"
+							 includeInLayout="{edbAction.visible}"
+							 visible="false"
+							 delete="reportAction(PayloadEventKind.DELETE)"
+							 edit="reportAction(PayloadEventKind.EDIT);"/>
+	</s:HGroup>
+</s:ItemRenderer>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.rubyamf.demo.views.components.*"
+		 height="{vgEdit.height}" >
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.views.skins.AutosizingTextAreaSkin;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.models.PostsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:PostsViewModel;
+	
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<s:VGroup id="vgEdit" width="100%" gap="0">
+		<!--- @private -->
+		<s:HGroup id="hgLayout" width="100%">
+			<s:VGroup width="100%"> 
+				<s:Group width="100%">
+					<s:Label text="Title" left="0" verticalCenter="0"/>
+					<s:TextInput id="tiTitle" top="1" left="76" right="0"
+								 text="{model.selectedPost.title}"
+								 change="model.selectedPost.title = tiTitle.text;"/>
+				</s:Group>
+				<s:Group width="100%">
+					<s:Label text="Description" left="0" top="5"/>
+					<s:TextArea id="taDescription"
+								right="0" left="76"
+								skinClass="com.fosrias.library.views.skins.AutosizingTextAreaSkin"
+								toolTip="Auto-sizes to fit content"
+								text="{model.selectedPost.detail}"
+								change="model.selectedPost.detail = taDescription.text;"/>
+				</s:Group>
+			</s:VGroup>
+		</s:HGroup><!--- @private -->
+		<s:Group id="gFooter" width="100%">
+			<s:HGroup right="0" verticalCenter="0" paddingTop="10">
+				<s:Button label="Save"
+						  visible="{model.isDirty}"
+						  click="model.execute(null, PayloadEventKind.SAVE);"/>
+				<s:Button label="Cancel"
+						  click="model.execute(null, PayloadEventKind.CANCEL);"/>
+			</s:HGroup>
+		</s:Group>
+	</s:VGroup>
+</s:Group>

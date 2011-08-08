@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="remoting-service" 
+         class="flex.messaging.services.RemotingService" 
+         messageTypes="flex.messaging.messages.RemotingMessage">
+    <default-channels>
+		<channel ref="my-rubyamf"/>
+    </default-channels>
+    <destination id="RubyAMF">
+        <channels>
+            <channel ref="my-rubyamf"/>
+			<channel ref="my-rubyamf-secure"/>
+        </channels>
+        <properties>
+            <source>*</source>
+        </properties>
+    </destination>
+	 <destination id="RubyAMF-secure">
+        <channels>
+            <channel ref="my-rubyamf-secure"/>
+        </channels>
+        <properties>
+            <source>*</source>
+        </properties>
+    </destination>
+</service>

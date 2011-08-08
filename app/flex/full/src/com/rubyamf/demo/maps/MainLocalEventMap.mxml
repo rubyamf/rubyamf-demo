@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<LocalEventMap 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+    xmlns="http://mate.asfusion.com/"
+	xmlns:business="com.rubyamf.demo.business.*"
+    cache="global">
+    
+    <!-- Script ____________________________________________________________ -->
+<fx:Script>
+<![CDATA[
+	import com.asfusion.mate.events.UnhandledFaultEvent;
+	import com.rubyamf.demo.events.PayloadEvent;
+	import com.rubyamf.demo.managers.MainManager;
+	import com.rubyamf.demo.views.MainUI;
+	import com.rubyamf.demo.views.models.MainViewModel;
+	
+	import mx.events.FlexEvent;
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	
+    <!-- Services __________________________________________________________ -->
+    <business:Services id="services"/>
+    
+    <!-- FlexEvent.PREINITIALIZE ___________________________________________ --> 
+    <EventHandlers type="{FlexEvent.PREINITIALIZE}" debug="true">
+		<ObjectBuilder generator="{MainManager}">
+            <Properties dispatcher="{scope.dispatcher}"/>
+			
+			<!-- TESTING ONLY: Remove during production. -->
+			<Properties hasDebugMessages="{true}"/>
+        </ObjectBuilder>
+    </EventHandlers> 
+	
+	<!-- UnhandledFaultEvent.FAULT _________________________________________ -->
+	<EventHandlers type="{UnhandledFaultEvent.FAULT}" debug="true" 
+				   dispatcherType="global">
+		<MethodInvoker generator="{MainManager}" 
+					   method="loadFault" 
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEvent.FLASH ________________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.FLASH}" debug="true" 
+				   dispatcherType="global">
+		<MethodInvoker generator="{MainManager}" 
+					   method="showNotice"
+					   arguments="{event.data}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEvent.EDITING ______________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.EDITING}" debug="true" priority="0">
+		<MethodInvoker generator="{MainManager}" 
+					   method="editing"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEvent.EXECUTE ______________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.EXECUTE}" debug="true" priority="0">
+		<MethodInvoker generator="{MainManager}" 
+					   method="execute"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEvent.SHOW_BLOG ____________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.SHOW_BLOG}" debug="true"
+				   dispatcherType="global">
+		<MethodInvoker generator="{MainManager}" 
+					   method="showBlog"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEvent.SHOW_POST ____________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.SHOW_POST}" debug="true"
+				   dispatcherType="global">
+		<MethodInvoker generator="{MainManager}" 
+					   method="showPost"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- View Injectors ____________________________________________________ -->
+    <Injectors target="{MainUI}" debug="true">
+        <ObjectBuilder generator="{MainViewModel}"  
+                       registerTarget="true"/>
+        <PropertyInjector targetKey="model" 
+                          source="{lastReturn}"/>
+    </Injectors>
+	
+	<!-- View Model Injectors ______________________________________________ -->
+	<Injectors target="{MainViewModel}" debug="true">
+        <PropertyInjector targetKey="dispatcher"
+						  source="{scope.dispatcher}"/>
+		<PropertyInjector targetKey="breadcrumbs"
+						  source="{MainManager}"
+						  sourceKey="modelBreadcrumbs"/>
+		<PropertyInjector targetKey="notice"
+						  source="{MainManager}"
+						  sourceKey="modelNotice"/>
+		<PropertyInjector targetKey="visible"
+						  source="{MainManager}"
+						  sourceKey="modelVisible"/>
+    </Injectors> 
+</fx:Declarations>
+	
+</LocalEventMap>

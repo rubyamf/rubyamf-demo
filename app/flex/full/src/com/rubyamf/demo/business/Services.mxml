@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- 
+	Configures all remote service objects. See config/remoting-config.xml
+	and config/services-config.xml and Properties | Flex Compiler 
+	for the project to see how to configure the application to use 
+	these files. 
+-->
+<fx:Object xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<!-- Define Script _____________________________________________________ -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.models.Blog;
+	import com.rubyamf.demo.models.Comment;
+	import com.rubyamf.demo.models.Post;
+	import com.rubyamf.demo.vos.CallResult;
+	import com.rubyamf.demo.vos.SessionToken;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Remote classes
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 * 
+	 * References remote classes explicitly so that they are included in the 
+	 * build even if they are not specifically referenced anywhere else in the 
+	 * application for AMF deserialization. 
+	 */
+	private static var classes:Array /* of Class */ = [Blog, Post, Comment, 
+		CallResult, SessionToken];
+]]>
+</fx:Script>
+
+	<!-- Define Remote Services ____________________________________________ -->
+	<fx:Declarations>
+		<mx:RemoteObject id="blogsService" 
+						 destination="RubyAMF"
+						 source="BlogsController"/>
+		<mx:RemoteObject id="commentsService"
+						 destination="RubyAMF"
+						 source="CommentsController"/>
+		<mx:RemoteObject id="postsService"
+						 destination="RubyAMF"
+						 source="PostsController"/>
+		<mx:RemoteObject id="userSessionsService"
+						 destination="RubyAMF"
+						 source="UserSessionsController"/>
+	</fx:Declarations>
+</fx:Object>

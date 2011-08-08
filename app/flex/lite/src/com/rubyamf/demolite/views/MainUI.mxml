@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<!--- 
+	The following class demonstrates various ways to make remote calls to with 
+    RubyAMF. To trace place breaks at the beginning of each to the methods 
+    and then click the Blogs menu button in the application.
+-->
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:business="com.rubyamf.demolite.business.*"
+		 xmlns:views="com.rubyamf.demolite.views.*" 
+		 width="720" 
+		 height="{imgLogo.height + vsMain.height + 100}" 
+		 minHeight="250"
+		 title="Lite Demo Application"
+		 creationComplete="loadBlogs();">
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.models.Blog;
+	import com.rubyamf.demo.models.Post;
+	import com.rubyamf.demo.vos.CallResult;
+	
+	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
+	import mx.rpc.AsyncToken;
+	import mx.rpc.Responder;
+	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.remoting.Operation;
+	import mx.rpc.remoting.RemoteObject;
+
+	//--------------------------------------------------------------------------
+	//
+	//  Variables
+	//
+	//--------------------------------------------------------------------------
+	
+	[Bindable]
+	/**
+	 * @private
+	 */
+	private var _blogs:ArrayCollection;
+	
+	/**
+	 * @private
+	 */
+	private var _posts:ArrayCollection;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 * 
+	 * Called when Blogs menu is clicked.
+	 */
+	private function loadBlogs():void
+	{
+		if (_blogs == null)
+			callWithToken(services.blogsService, "index", onFault, 
+				onBlogsIndexResult);
+	}
+	
+	/**
+	 * @private
+	 */
+	private function onFault(event:FaultEvent):void
+	{
+		var faultMessage:String = event.fault.faultString + "\n" + 
+			event.fault.faultDetail;
+		Alert.show(faultMessage, "Fault Message");
+	}
+	
+	/**
+	 * @private
+	 */
+	private function onBlogsIndexResult(event:ResultEvent):void
+	{
+		var result:CallResult = event.result as CallResult;
+		_blogs = result.data as ArrayCollection;
+		
+		//Blog does not contain posts based on server controller 
+		//scope associated with this call.
+		var blog:Blog = _blogs[0] as Blog;
+		
+		if (blog != null)
+			callWithToken(services.blogsService, "show", onFault, 
+				onBlogShowResult, blog.id);
+	}
+	
+	/**
+	 * @private
+	 */
+	private function onBlogShowResult(event:ResultEvent):void
+	{
+		var result:CallResult = event.result as CallResult;
+	
+		//Blog contains posts based on server controller 
+		//scope associated with this call.
+		var blog:Blog = result.data as Blog;
+		
+		_posts = blog.posts;
+		
+		//Post does not contain comments based on server controller 
+		//scope associated with this call.
+		var post:Post = _posts[0] as Post;
+		
+		if (post != null)
+			callWithToken(services.postsService, "show", onFault, 
+				onPostShowResult, post.id, blog.id);
+	}
+	
+	/**
+	 * @private
+	 */
+	private function onPostShowResult(event:ResultEvent):void
+	{
+		var result:CallResult = event.result as CallResult;
+		
+		//Post contains comments based on server controller 
+		//scope associated with this call. 
+		//
+		//HOWEVER ..., they are not typed (Object instances). Why? 
+		//
+		//No where in the application is the class Comment referenced 
+		//and so the Comment class, though in the project and aliased, etc.,
+		//is not compiled. See Services.mxml and uncomment the Comment class
+		//to see how this changes.
+		var post:Post = result.data as Post;
+	}
+	
+	/**
+	 * @private
+	 * Uses async token method which allows for a lot of flexibility in
+	 * making and handling remote calls.
+	 */
+	private function callWithToken(service:RemoteObject, 
+								   method:String,
+								   faultHandler:Function,
+								   resultHandler:Function,
+								   ...args):void
+	{
+		//Create a token
+		var token:AsyncToken;
+		var operation:Operation = service.getOperation(method) as Operation;
+		
+		operation.showBusyCursor = true;
+		
+		//Call the remote method
+		if (args.length > 0)
+		{
+			token = operation.send.apply(null, args);
+			
+		}  else {
+			
+			token = operation.send();
+		} 
+		
+		//Set the token responder. Using package here to resolve 
+		//compiler conflict
+		token.addResponder( new mx.rpc.Responder(resultHandler, faultHandler) );
+	}													
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	<!-- Define Services __________________________________________________  -->
+	<business:Services id="services"/>
+	
+</fx:Declarations>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<s:Group width="100%" height="100%">
+		<s:HGroup id="hgHeader" left="10" top="10" 
+				  gap="20"
+				  verticalAlign="middle">
+			<s:BorderContainer width="100%" height="{imgLogo.height}"
+							   backgroundColor="#000000"
+							   borderColor="#000000"
+							   cornerRadius="5">
+				<mx:Image id="imgLogo" 
+						  source="@Embed(source='assets/images/gateway.png')"/>
+			</s:BorderContainer>
+			<s:ButtonBar id="bbMain" dataProvider="{vsMain}"/>
+		</s:HGroup>
+		<mx:ViewStack id="vsMain" left="10" right="10" top="60" 
+					  height="{vsMain.selectedIndex == 0 ? rtHome.height +
+					  lblRepo.height : dgBlogs.height}">
+			<s:NavigatorContent label="Home" width="100%"
+								showEffect="fshow">
+				<s:VGroup width="100%">
+					<s:RichEditableText id="rtHome" width="100%"
+										editable="false"
+										text="This RubyAMF demo application highlights the following client-side features:&#xd;&#xd;   1. RemoteObject service calls to a Ruby on Rails backend.&#xd;   2. Remote class aliasing of mapped classes.&#xd;   3. Mate MVC framework.&#xd;&#xd;Further, the application highlights the following server-side features:&#xd;&#xd;   1. Controller parameter mapping in routes.rb.&#xd;   2. In-model class mapping with scopes and methods.&#xd;   3. Configuration in both application.rb and legacy configuration and mapping in rubyamf_config.rb.&#xd;&#xd; The README in the Rails and Flex source code discuss the application architecture, which can be found at:"/>
+					<mx:LinkButton id="lblRepo"
+								   label="https://github.com/rubyamf/rubyamf-demo" 
+								   textDecoration="underline"
+								   paddingLeft="10" paddingRight="0"
+								   skin="com.rubyamf.demolite.views.skins.UnfilledLinkButton"
+								   click="navigateToURL( new URLRequest(
+								   'https://github.com/rubyamf/rubyamf-demo'), '_blank');"/>
+								   
+				</s:VGroup>
+				</s:NavigatorContent>
+			<s:NavigatorContent label="Blogs" width="100%">
+				<s:Group width="100%">
+					<s:DataGroup id="dgBlogs" width="100%"
+								 dataProvider="{_blogs}"
+								 itemRenderer="com.rubyamf.demolite.views.renderers.GroupItemRenderer">
+						<s:layout>
+							<s:VerticalLayout gap="0"/>
+						</s:layout>
+					</s:DataGroup>
+				</s:Group>
+			</s:NavigatorContent>
+		</mx:ViewStack>
+		<s:HGroup left="10" right="10" bottom="10" 
+				  horizontalAlign="center" verticalAlign="middle">
+			<mx:LinkButton label="Home" paddingLeft="0" paddingRight="0"
+						   skin="com.rubyamf.demolite.views.skins.UnfilledLinkButton"
+						   click="vsMain.selectedIndex = 0;"/>
+			<s:Label text="|"/>
+			<mx:LinkButton label="Blogs" paddingLeft="0" paddingRight="0"
+						   skin="com.rubyamf.demolite.views.skins.UnfilledLinkButton"
+						   click="vsMain.selectedIndex = 1;"/>
+			<s:Label text="|"/>
+			<mx:LinkButton label="Contact" paddingLeft="0" paddingRight="0"
+						   skin="com.rubyamf.demolite.views.skins.UnfilledLinkButton"
+						   click="navigateToURL( new URLRequest(
+						   'mailto:rubyamf+demo@googlegroups.com'), '_self');"/>
+		</s:HGroup>
+	</s:Group>
+</s:Panel>

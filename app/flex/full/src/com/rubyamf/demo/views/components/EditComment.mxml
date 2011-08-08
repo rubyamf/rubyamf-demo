@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:comps="com.rubyamf.demo.views.components.*"
+		  xmlns:maps="com.rubyamf.demo.maps.*"
+		  creationComplete="onComplete();">
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.business.RemoteService;
+	import com.fosrias.library.views.skins.AutosizingTextAreaSkin;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.models.Comment;
+	import com.rubyamf.demo.views.models.CommentsViewModel;
+	import com.rubyamf.demo.views.models.PostsViewModel;
+	
+	import mx.binding.utils.BindingUtils;
+	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Variables
+	//
+	//--------------------------------------------------------------------------
+	
+	[Bindable]
+	/**
+	 * @private
+	 */
+	private var _isDirty:Boolean = false;
+	
+	[Bindable]
+	/**
+	 * @private
+	 */
+	private var _isEnabled:Boolean = false;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:CommentsViewModel;
+
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function cancel(value:Object=null):void
+	{
+		tiName.text = null;
+		tiEmail.text = null; 
+		tiURL.text = null;
+		taDescription.text = null;
+		checkDirty();
+	}
+	
+	/**
+	 * @private
+	 */
+	private function checkDirty():void
+	{
+		var content:String = tiName.text + tiEmail.text + tiURL.text + 
+			taDescription.text;
+		
+		_isDirty = content != null && content.length > 0;
+		
+		_isEnabled = _isDirty && tiName.text.length > 0 &&
+			tiEmail.text.length > 0 && taDescription.text.length > 0;
+	}
+	
+	/**
+	 * @private
+	 */
+	private function onComplete():void
+	{
+		//Clear the comment form whenever an new post is chosen or the
+		//view index changes or a session change occurs.
+		BindingUtils.bindSetter(cancel, this, ["model", "hasSession"]);
+		
+		BindingUtils.bindSetter(cancel, this, ["model", "comments"]);
+		
+		BindingUtils.bindSetter(cancel, this, ["model", "viewIndex"]);
+	}
+	
+	/**
+	 * @private
+	 */
+	private function submit():void
+	{
+		var comment:Comment = new Comment(0, tiName.text, tiEmail.text,
+			tiURL.text, taDescription.text);
+		
+		model.execute(comment, PayloadEventKind.SAVE, null, true);
+		cancel();
+	}
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:Form width="100%"
+			 paddingBottom="0"
+			 paddingLeft="0"
+			 paddingRight="0"
+			 paddingTop="0">
+		<mx:FormHeading label="Add a Comment" textAlign="left"/>
+		<mx:FormItem label="Name" width="100%"  required="true">
+			<s:TextInput id="tiName" width="250"
+						 change="checkDirty();"/>
+		</mx:FormItem>
+		<mx:FormItem label="Email" width="100%" required="true">
+			<s:TextInput id="tiEmail" width="250"
+						 change="checkDirty();"/>
+		</mx:FormItem>
+		<mx:FormItem label="URL" width="100%">
+			<s:TextInput id="tiURL" width="250"
+						 change="checkDirty();"/>
+		</mx:FormItem>
+		<mx:FormItem label="Comment" width="100%" required="true">
+			<s:TextArea id="taDescription" width="100%"
+					    skinClass="com.fosrias.library.views.skins.AutosizingTextAreaSkin"
+					    toolTip="Auto-sizes to fit content"
+						change="checkDirty();"/>
+		</mx:FormItem>
+	</mx:Form>
+	<s:HGroup width="100%" horizontalAlign="right"
+			  includeInLayout="{_isDirty}"
+			  visible="{_isDirty}">
+		<s:Button label="Submit"
+				  enabled="{_isEnabled}"
+				  click="submit();"/>
+		<s:Button label="Cancel"
+				  click="cancel();"/>
+	</s:HGroup>
+</s:VGroup>

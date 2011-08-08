@@ -1,0 +1,86 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace views "com.rubyamf.demolite.views.*";
+@namespace comps "com.rubyamf.demolite.views.components.*";
+@namespace renderers "com.rubyamf.demolite.views.renderers.*";
+
+/* Global styles */
+global
+{
+	rollOverColor: #2B2B2B;
+}
+
+/* Type styles */
+mx|Alert 
+{
+	cornerRadius:          5;
+	modalTransparencyBlur: 0;
+	modalTransparency:     0;
+
+}
+
+mx|LinkButton 
+{
+	textRollOverColor: #F71147;
+}
+
+views|MainUI 
+{
+	cornerRadius: 5;
+}
+
+renderers|GroupItemRenderer
+{
+	rollOverColor:  #808080;
+	titleStyleName: listTitle;
+}
+
+/* Class styles */
+.sessionLink
+{
+	rollOverColor: #3B3B3B;
+}
+
+.editFormLayout
+{
+	textAlign: left;
+}
+
+.listTitle
+{
+	color: 		#F71147;
+	fontSize: 	14;
+	fontWeight: bold;
+}
+
+.commentTitle
+{
+	color: 		#F71147;
+	fontWeight: bold;
+}
+
+.postTitle
+{
+	color: 		#555555;
+	fontSize: 	14;
+	fontWeight: bold;
+}
+
+.actionLink
+{
+	color: 				#F71147;
+	rollOverAlpha:      0;
+	textDecoration:     underline;
+	textRollOverColor:  #F71147;
+	textSelectionColor: #F71147;
+}
+
+.returnLink
+{
+	color: 				#CCCCCC;
+	rollOverAlpha:      0;
+	textRollOverColor:  #F71147;
+	textSelectionColor: #F71147;
+}
+

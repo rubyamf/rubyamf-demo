@@ -1,0 +1,143 @@
+== DESCRIPTION:
+
+Demonstrates the configuration of RubyAMF 2.0 in a Ruby on Rails application and an associated Flex application.
+
+A live version of the application can be found {here}[http://rubyamf.fosrias.com].
+
+== INSTALLATION
+
+1. Clone the repository and run bundle install then rake db:create, db:migrate and db:seed.
+
+2. Launch the server on port [port] and fire it up on http://locahost:[port].
+
+== RUBY ON RAILS
+
+1. Global RubyAMF configurations are found at the bottom of config/application.rb.
+
+2. Parameter mappings are found in config/routes.rb for adding incoming parameters to the params hash.
+
+3. In-model class mappings are found in the app/models files.
+
+4. Using the <tt>ActionController#credentials</tt> attribute, which contains the
+   :username and :password hash keys set with the Flash <tt>RemoteObject.setRemoteCredentials</tt> method,
+   with {Authogic}[https://github.com/binarylogic/authlogic] authentication is shown in the
+   <tt>UserSessionsController#create</tt> method.
+
+5. The use of deserialized objects in controllers is demonstrated in the various app/controllers files. Currently,
+   RubyAMF 2.0 has not implemented scaffolding (converting objects to hashes that can be passed to the <tt>create</tt>,
+   <tt>update_attributes</tt>, and <tt>build</tt> methods of <tt>ActiveRecord</tt>). Thus, all the examples demonstrate
+   using de-serialized class instances in controller methods.
+
+6. TODO: Testing discussion.
+
+== FLEX
+
+Currently due to a (yet un-found) regression in spark.controls.datagroup in SDK 4.5,
+the Flex application is built using Flex SDK 4.1. You will need to use SDK 4.1
+if you want to compile and trace the Flex code.
+
+1. There are two different Flex applications included in this demo:
+
+   <b>Lite</b> A read-only Flex application that demonstrates the basics of configuring a
+   Flex application for remoting with source code found in app/flex/lite.
+
+   <b>Full</b> A Flex application that demonstrates a complete CRUD application with source code
+   found in app/flex/full.
+
+2. To configure the projects locally with FlashBuilder:
+
+   a. Import the project from app/flex/[version].
+
+   b. In Properties/Flex Compiler, configure and select Flex SDK 4.1.
+
+   c. Configure the Properties/Flex Build Path (lite version)
+      *  Output folder: path/to/rubyamf-demo/public (../public/lite)
+      * Output folder URL: http://localhost:[port] (//localhost:[port]/lite)
+
+3. RubyAMF remoting in each of the applications is:
+   a. Configured using remoting-config.xml and services-config.xml in the app/flex/config
+      folder and including <tt>-services "../config/services-config.xml"</tt> in the compliler arguments.
+
+   b. Defined for remote objects in the mxml file business.Services.
+      * Note the use a static class variable that ensures that all remote classes are specifically referenced in
+        the Flex application. If you do not do something like this you pull your hair out wondering why you keep
+        getting un-mapped generic Objects back for certain classes when you are testing remote calls after setting
+        up the classes. The reason this happens is you have not yet used the class anywhere and
+        thus the compiler ignores it. Thus, this useful little hack.
+
+=== LITE DEMO
+
+1. RubyAMF remote object configuration is found in the <tt>demolite.business.Services</tt> class.
+
+2. Mapped Models and Value Objects corresponding to remote classes are defined in the <tt>demo.models</tt>
+   and <tt>demo.vos</tt> packages (see ruby classes for corresponding client package mapping definition).
+
+3. All remote calls are made and handled in the <tt>demolite.views.MainUI</tt> component.
+
+=== FULL DEMO
+
+Note this version is not fully functional yet.
+
+1. The full Flex application uses the {Mate}[http://mate.asfusion.com] MVC framework for Flex. Unless otherwise noted,
+   all of the classes discussed below are in the com.rubyamf.demo package.
+
+2. RubyAMF remoting is implemented in the <tt>LocalEventMap</tt> classes in the <tt>maps</tt> package in the
+   <tt>AsyncMethodInvoker</tt> tag.
+
+3. Mapped Models and Value Objects corresponding to remote classes are defined in the <tt>models</tt>
+   and <tt>vos</tt> packages (see corresponding ruby classes for associated in-model mapping definition).
+
+4. Managers (Mate's terminology for Controller in MVC) handle all view interactions in their
+   <tt>execute</tt> method. All remote results are handled in the <tt>callResult</tt> and <tt>callFault</tt> methods.
+   Placing breakpoints at the first line of each of these methods will allow you to easily trace
+   how calls are formulated and their results.
+
+   In each manager, see the <tt>remoteCall</tt> method to see how call parameters are configured and the
+   asynchronous call is dispatched to the corresponding <tt>LocalEventMap</tt>.
+
+5. The delegate class <tt>com.fosrias.library.business.RemoteService</tt> is responsible for the raw
+   asynchronous calls. Placing breakpoints at the first line of the <tt>call</tt>, <tt>onResult</tt> and
+   <tt>onFault</tt> methods will allow you to easily trace how the raw remote calls are configured and their
+   raw results.
+
+6. The Flex application incorporates a debug console that you can open and close by dragging
+   the white handle at the bottom of the application. Among other things, it displays remote
+   call related timestamps.
+
+7. The <tt>managers.UserSessionsManager</tt> <tt>execute</tt> method demonstrates setting remote credentials.
+
+8. Tracing shorcuts:
+   * Review business.Services class to see how the <tt>RemoteObject</tt> tags are configured
+     for their corresponding controllers.
+
+   * In all managers, except <tt>managers.MainManager</tt>, place break points at the beginning of the
+     <tt>execute</tt>, <tt>remoteCall</tt>, <tt>callFault</tt>, and <tt>callResult</tt> methods to trace how user
+     interaction translates to remote calls and how those calls are handled upon return.
+
+   * In the <tt>com.fosrias.library.business.RemoteService</tt> class, place breakpoints at the beginning
+     of the <tt>call</tt>, <tt>onFault</tt>, and <tt>onResult</tt> methods to trace raw call configuration and
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2011 Mark W. Foster
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

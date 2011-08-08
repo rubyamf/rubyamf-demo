@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:maps="com.rubyamf.demo.maps.*"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:comps="com.rubyamf.demo.views.components.*" 
+		 xmlns:views="com.rubyamf.demo.views.*"
+		 height="{vsBlogs.height}"
+	     render="updateHeight();">
+	
+<fx:Declarations>
+	<!-- Define Effects ___________________________________________________  -->
+	<s:Fade id="fHide" alphaFrom="1" alphaTo="0" duration="250"/>
+	<s:Fade id="fShow" alphaFrom="0" alphaTo="1" duration="250"/>
+</fx:Declarations>
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.business.RemoteService;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.models.BlogsViewModel;
+	import com.rubyamf.demo.views.renderers.GroupItemRenderer;
+	
+	import mx.binding.utils.BindingUtils;
+	import mx.collections.ArrayCollection;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:BlogsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function updateHeight():void
+	{
+		var newHeight:Number;
+		
+		if (vsBlogs.selectedIndex == 0)
+		{
+			newHeight =  ldgBlogs.height +  vsCreateBlog.height;
+		} else {
+			newHeight = sbBlog.height;
+			vsBlogs.height = height;
+		}
+		
+		if (height != newHeight)
+			height = newHeight;
+	}
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	
+	<!-- Define Map _______________________________________________________  -->
+	<maps:BlogsLocalEventMap dispatcher="{this}"/>
+</fx:Declarations>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:ViewStack id="vsBlogs" width="100%" selectedIndex="{model.viewIndex}">
+		<s:NavigatorContent width="100%" 
+							showEffect="fShow">
+			<s:VGroup width="100%">
+				<mx:ViewStack id="vsCreateBlog" width="100%"
+							  height="{vsCreateBlog.selectedIndex == 0 ?
+								  20 : ebBlog.height}"
+								  selectedIndex="{model.hasSession ? 0 :  
+								  (model.action == null ? 0 : 1)}"
+							  updateComplete="updateHeight();">
+					<s:NavigatorContent width="100%">
+						<s:Group width="100%" height="20">
+							<s:Label text="Sample Blogs" verticalCenter="0"/>
+							<mx:Image right="0" verticalCenter="0"
+									  buttonMode="true"
+									  mouseChildren="false"
+									  useHandCursor="true"
+									  source="@Embed(source='assets/images/create.png')"
+									  toolTip="Create a new Blog"
+									  enabled="{model.hasSession &amp;&amp;
+									  	  !model.hasEditLock}"
+									  visible="{model.hasSession}"
+									  click="model.execute(null, 
+										  PayloadEventKind.CREATE);
+										  vsCreateBlog.selectedIndex = 1;"/>
+						</s:Group>
+					</s:NavigatorContent>
+					<s:NavigatorContent width="100%">
+						<comps:EditBlog id="ebBlog" width="100%"
+										model="{model}"/>
+					</s:NavigatorContent>
+				</mx:ViewStack>
+				<comps:LinkedDataGroup id="ldgBlogs" width="100%"
+									   dataProvider="{model.blogs}"
+									   itemRenderer="com.rubyamf.demo.views.renderers.GroupItemRenderer"
+									   model="{model}"/>
+			</s:VGroup>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%">
+			<comps:ShowBlog id="sbBlog" width="100%" model="{model}"/>
+		</s:NavigatorContent>
+	</mx:ViewStack>
+</s:Group>

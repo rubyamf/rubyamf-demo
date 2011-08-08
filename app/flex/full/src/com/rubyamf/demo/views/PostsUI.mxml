@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:comps="com.rubyamf.demo.views.components.*"
+		 xmlns:maps="com.rubyamf.demo.maps.*"
+		 render="updateHeight();">
+
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.business.RemoteService;
+	import com.rubyamf.demo.views.models.PostsViewModel;
+	
+	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:PostsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function updateHeight():void
+	{
+		var newHeight:Number;
+		
+		if (vsPosts.selectedIndex == 0)
+		{
+			newHeight =  ldgPosts.height +  vsCreatePost.height;
+			
+		} else {
+			
+			newHeight = sbPost.height;
+			vsPosts.height = height;
+		}
+		
+		if (height != newHeight)
+		{
+			height = newHeight;	
+			ldgPosts.invalidateDisplayList();
+		}
+			
+	}
+]]>
+</fx:Script>
+
+<fx:Declarations>
+	
+	<!-- Define Map _______________________________________________________  -->
+	<maps:PostsLocalEventMap dispatcher="{this}"/>
+	
+</fx:Declarations>
+
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:ViewStack id="vsPosts" width="100%" paddingLeft="15"
+				  selectedIndex="{model.viewIndex}"
+				  creationPolicy="all">
+		<s:NavigatorContent width="100%">
+			<s:VGroup width="100%">
+				<mx:ViewStack id="vsCreatePost" width="100%"
+							  height="{vsCreatePost.selectedIndex == 0 ?
+							  (model.hasSession ? 20 : 0) : ebPost.height}"
+							  selectedIndex="{model.hasSession ?  
+							  	(model.action == null ? 0 : 1) : 0}"
+							  resize="updateHeight();">
+					<s:NavigatorContent width="100%">
+						<s:Group width="100%" includeInLayout="{model.isEditable}"
+								 visible="{model.isEditable}">
+							<s:Label text="Posts" verticalCenter="0"
+									 styleName="listTitle"/>
+							<mx:Image right="0" verticalCenter="0"
+									  buttonMode="true"
+									  mouseChildren="false"
+									  useHandCursor="true"
+									  source="@Embed(source='assets/images/create.png')"
+									  toolTip="Create a new Post"
+									  enabled="{model.hasSession}"
+									  visible="{model.hasSession}"
+									  click="model.execute(null, 
+									  RemoteService.CREATE);"/>
+						</s:Group>
+					</s:NavigatorContent>
+					<s:NavigatorContent width="100%">
+						<comps:EditPost id="ebPost" width="100%"
+										model="{model}"/>
+					</s:NavigatorContent>
+				</mx:ViewStack>
+				<comps:LinkedDataGroup id="ldgPosts" width="100%"
+									   dataProvider="{model.posts}"
+									   itemRenderer="com.rubyamf.demo.views.renderers.PostItemRenderer"
+									   model="{model}"/>
+			</s:VGroup>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%">
+			<comps:ShowPost id="sbPost" width="100%" model="{model}"/>
+		</s:NavigatorContent>
+	</mx:ViewStack>
+</s:Group>

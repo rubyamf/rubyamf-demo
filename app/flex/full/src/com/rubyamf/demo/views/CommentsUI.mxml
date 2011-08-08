@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:comps="com.rubyamf.demo.views.components.*"
+		 xmlns:maps="com.rubyamf.demo.maps.*"
+		 width="100%">
+
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.business.RemoteService;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.models.Comment;
+	import com.rubyamf.demo.views.models.CommentsViewModel;
+	import com.rubyamf.demo.views.models.PostsViewModel;
+	
+	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:CommentsViewModel;
+	
+]]>
+</fx:Script>
+
+<fx:Declarations>
+	<!-- Define Map _______________________________________________________  -->
+	<maps:CommentsLocalEventMap dispatcher="{this}"/>
+	
+</fx:Declarations>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<comps:LinkedDataGroup id="ldgComments" width="100%"
+						   dataProvider="{model.comments}"
+						   itemRenderer="com.rubyamf.demo.views.renderers.CommentItemRenderer"
+						   model="{model}"/>
+		<comps:EditComment id="edcComment" width="100%"
+					   paddingLeft="10"
+					   model="{model}"
+					   includeInLayout="{!model.hasSession}"
+					   visible="{!model.hasSession}"/>
+</s:VGroup>

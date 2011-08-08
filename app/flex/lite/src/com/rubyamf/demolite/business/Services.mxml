@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- 
+	Configures all remote service objects. See config/remoting-config.xml
+	and config/services-config.xml and Properties | Flex Compiler 
+	for the project to see how to configure the application to use 
+	these files. Keeping this in one location makes it simple to manage
+    all service definitions.
+-->
+<fx:Object xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<!-- Define Script _____________________________________________________ -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.models.Blog;
+	import com.rubyamf.demo.models.Comment;
+	import com.rubyamf.demo.models.Post;
+	import com.rubyamf.demo.vos.CallResult;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Remote classes
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 * 
+	 * References remote classes explicitly so that they are included in the 
+	 * build even if they are not specifically referenced anywhere else in the 
+	 * application for AMF deserialization. Comment this line out and look at
+	 * the return values to find out what happens when classes are not 
+	 * explicitly referenced in actionscript. Hint: the items in the arrays
+	 * are not typed.
+	 */
+	private static var classes:Array /* of Class */ = [Blog, 
+													   Post, 
+													   CallResult,
+													   /* Comment */];
+]]>
+</fx:Script>
+
+	<!-- Define Remote Services ____________________________________________ -->
+	<fx:Declarations>
+		<mx:RemoteObject id="blogsService" 
+						 destination="RubyAMF"
+						 source="BlogsController"/>
+		<mx:RemoteObject id="postsService"
+						 destination="RubyAMF"
+						 source="PostsController"/>
+	</fx:Declarations>
+</fx:Object>

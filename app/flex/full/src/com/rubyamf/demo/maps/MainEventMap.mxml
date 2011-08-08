@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<EventMap 
+    xmlns:fx="http://ns.adobe.com/mxml/2009" 
+    xmlns:s="library://ns.adobe.com/flex/spark" 
+    xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:business="com.fosrias.base.business.*"
+	xmlns="http://mate.asfusion.com/">
+    
+<fx:Declarations>
+	
+	<!-- Mate Debugger _____________________________________________________ -->
+    <!-- Remove during production. -->
+    <Debugger level="{Debugger.ALL}"/>
+</fx:Declarations>
+    
+</EventMap>

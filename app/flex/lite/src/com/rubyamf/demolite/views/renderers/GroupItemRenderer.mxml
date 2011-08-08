@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:comps="com.rubyamf.demo.views.components.*"
+				autoDrawBackground="true"
+				width="100%"
+			    dataChange="dataChangeHandler(event);"
+				resize="onResize();">
+	
+	<!-- Define Metadata ___________________________________________________ --> 	
+<fx:Metadata>
+/**
+ * Name of the CSS Style declaration to use for the styles for title labels.
+ */
+[Style(name="titleStyleName", type="String", inherit="no")]
+</fx:Metadata>
+	
+	<!-- Define Script _____________________________________________________ --> 
+<fx:Script>
+<![CDATA[
+	import flashx.textLayout.elements.ParagraphElement;
+	import flashx.textLayout.elements.SpanElement;
+	import flashx.textLayout.elements.TextFlow;
+	
+	import spark.components.supportClasses.ItemRenderer;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Constants
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * The CUTOFF constant specifies the number of characters in the rendered
+	 * text to truncate to.
+	 */
+	public static const CUTOFF:int = 225;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Variables
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	protected var _contentSpan:SpanElement = new SpanElement();
+	
+	/**
+	 * @private
+	 */
+	protected var _priorData:Object;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  contentSource
+	//----------------------------------
+	
+	/**
+	 * The content of the body text.
+	 */
+	public function get contentText():String
+	{
+		return data.detail;
+	}
+	
+	//----------------------------------
+	//  title
+	//----------------------------------
+	
+	/**
+	 * The title to display.
+	 */
+	public function get title():String
+	{
+		return data.title;
+	}
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Protected methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * Builds a paragraph element to be rendered as the title.
+	 */
+	protected function buildTitleParagraph():ParagraphElement
+	{
+		var span:SpanElement = new SpanElement();
+		var paragraph:ParagraphElement = new ParagraphElement();
+		paragraph.paragraphSpaceAfter = 5;
+		
+		//Build the title paragraph
+		span.text = this.title;
+		
+		var titleStyleName:String = getStyle("titleStyleName");
+		
+		if (titleStyleName)
+		{
+			var css:CSSStyleDeclaration = 
+				styleManager.getMergedStyleDeclaration("." + titleStyleName);
+			if (css)
+			{
+				span.color = css.getStyle("color");
+				span.fontSize = css.getStyle("fontSize");
+				span.fontWeight = css.getStyle("fontWeight");
+			}
+		}
+		paragraph.addChild(span);
+		
+		return paragraph;
+	}
+	
+	/**
+	 * @private
+	 */
+	protected function dataChangeHandler(event:Event):Boolean
+	{
+		if (_priorData != data)
+		{
+			if (data == null)
+				return false;
+			
+			//Create the textFlow
+			var textFlow:TextFlow = new TextFlow();
+			var paragraph:ParagraphElement;
+			
+			textFlow.addChild( buildTitleParagraph() );
+			
+			//Apply truncation to the content if it is too long.
+			updateContentSpan();
+			
+			paragraph = new ParagraphElement();
+			paragraph.addChild(_contentSpan);
+			textFlow.addChild(paragraph);
+			
+			_priorData = data;
+			
+			taDescription.textFlow =  textFlow;
+			return true;
+		} 
+		return false;
+	}
+	
+	/**
+	 * Updates the content and allows overriding to show all text versus the
+	 * default behavior that truncates the content length to CUTOFF.
+	 */
+	protected function updateContentSpan(applyLimit:Boolean = true):void
+	{
+		var content:String = contentText;
+		
+		if (content == null)
+		{
+			content = "";
+		}
+		
+		//Truncate the content
+		if (applyLimit)
+		{ 
+			if (CUTOFF > 0 && content.length > CUTOFF)
+			{	
+				content = content.slice(0, CUTOFF);
+				
+				//Here we make the content pretty
+				
+				//We first clear out multiple lines
+				var lines:Array = content.split("\n");
+				
+				if (lines.length > 1)
+					content = lines[0];
+				
+				//Next we determine if the last character is a period
+				if (content.charAt(content.length - 1) == ".")
+				{
+					//We strip the period
+					content = content.slice(0, content.length - 2) + " ...";
+					
+				} else if (content.charAt(content.length - 1) == " ") {
+					
+					//Last character is space so add dots
+					content = content + "...";
+					
+				} else {
+					
+					content = content + " ...";
+				}
+				
+			} else if (CUTOFF == 0 &&  content.length > CUTOFF) {
+				
+				//Completely hides the description.
+				content = "";
+			}
+		}
+		_contentSpan.text = content;
+	}
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function onResize():void
+	{
+		//HACK to get texflow to resize 
+		taDescription.textFlow.invalidateAllFormats();
+	}
+	
+]]>
+</fx:Script>
+	
+	<!-- Define GUI ________________________________________________________ --> 
+	<s:RichText id="taDescription" width="100%"
+				paddingTop="5"
+				paddingLeft="5"
+				paddingBottom="5"
+				paddingRight="5"
+				mouseChildren="false"
+				buttonMode="true"
+				useHandCursor="true"
+				resize="onResize();"/>
+</s:ItemRenderer>

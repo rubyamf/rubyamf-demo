@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:views="com.rubyamf.demo.views.*"
+			   xmlns:maps="com.rubyamf.demo.maps.*"
+			   xmlns:libViews="com.fosrias.library.views.*"
+			   minWidth="740"
+			   minHeight="440"
+			   frameRate="60"
+			   creationComplete="_isComplete = true;">
+	
+	<!-- Define Styles _____________________________________________________ -->
+	<fx:Style source="assets/styles/spark_graphite.css"/>
+	<fx:Style source="assets/styles/defaults.css"/>
+	
+<fx:Script>
+<![CDATA[
+	import mx.controls.Alert;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Variables
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private var _isComplete:Boolean = false;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	//Sets the minimum size of the embedded swf so browser scroll bars appear
+	//if the application size is a larger than the browser window.
+	private function onResize():void
+	{
+		if (mainUI == null || !_isComplete)
+			return;
+		
+		if (ExternalInterface.available)
+			ExternalInterface.call("setMinHeight", mainUI.height + 100);
+		
+		trace("Resize application");
+	}
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	
+	<!-- Define Map ________________________________________________________ -->
+	<maps:MainEventMap/>
+</fx:Declarations>
+	
+	<!-- Define GUI ________________________________________________________ -->
+	<views:MainUI id="mainUI" horizontalCenter="0" top="10"
+				  resize="onResize();"/>
+</s:Application>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.rubyamf.demo.views.components.*"
+		 height="{gFooter.height + 10 + hgLayout.height}" >
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.views.skins.AutosizingTextAreaSkin;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.models.BlogsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:BlogsViewModel;
+	
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<s:VGroup width="100%" gap="0">
+		<!--- @private -->
+		<s:HGroup id="hgLayout" width="100%"
+				  height="{tiTitle.height + tiTagline.height +
+				  taDescription.height + tiAuthor.height + taBio.height + 40}">
+			<s:VGroup width="100%"> 
+				<s:Group width="100%">
+					<s:Label text="Title" left="0" verticalCenter="0"/>
+					<s:TextInput id="tiTitle" top="1" left="76" right="0"
+								 text="{model.selectedBlog.title}"
+								 change="model.selectedBlog.title = tiTitle.text;"/>
+				</s:Group>
+				<s:Group width="100%">
+					<s:Label text="Description" left="0" top="5"/>
+					<s:TextArea id="taDescription"
+								right="0" left="76"
+								skinClass="com.fosrias.library.views.skins.AutosizingTextAreaSkin"
+								toolTip="Auto-sizes to fit content"
+								text="{model.selectedBlog.detail}"
+								change="model.selectedBlog.detail = taDescription.text;"/>
+				</s:Group>
+				<s:Group width="100%">
+					<s:Label text="Tagline" left="0" verticalCenter="0"/>
+					<s:TextInput id="tiTagline" left="76" right="0"
+								 text="{model.selectedBlog.tagline}"
+								 change="model.selectedBlog.tagline = tiTagline.text;"/>
+				</s:Group>
+				<s:Group width="100%">
+					<s:Label text="Author" left="0" verticalCenter="0"/>
+					<s:TextInput id="tiAuthor" left="76" right="0"
+								 text="{model.selectedBlog.author}"
+								 change="model.selectedBlog.author = tiAuthor.text;"/>
+				</s:Group>
+				<s:Group width="100%">
+					<s:Label text="Bio" left="0" top="5"/>
+					<s:TextArea id="taBio" right="0" left="76"
+								skinClass="com.fosrias.library.views.skins.AutosizingTextAreaSkin"
+								toolTip="Auto-sizes to fit content"
+								text="{model.selectedBlog.bio}"
+								change="model.selectedBlog.bio = taBio.text;"/>
+				</s:Group>
+			</s:VGroup>
+			<s:VGroup width="100" horizontalAlign="center">
+				<!--- @private -->
+				<s:Group width="100" height="100">
+					<mx:Image id="iImage" width="100%" height="100%" top="0"
+							  horizontalAlign="center"
+							  scaleContent="true"
+						 source="{model.image}"/>
+				</s:Group>
+				<s:HGroup width="100%" horizontalAlign="center">
+					<mx:LinkButton label="{model.selectedBlog.image != null ? 
+								   'Change' : 'Add'}"
+								   paddingLeft="0"
+								   paddingRight="0"
+								   skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+								   styleName="returnLink"
+								   click="model.execute(null, 
+								       PayloadEventKind.LOAD);"/>
+					<mx:LinkButton  id="btnDelete" label="Delete"
+									visible="{model.selectedBlog.image != null}"
+									includeInLayout="{btnDelete.visible}"
+									paddingLeft="0"
+									paddingRight="0"
+									skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+									styleName="returnLink"
+									click="model.selectedBlog.image = null;
+									    iImage.source = model.image;"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:HGroup><!--- @private -->
+		<s:Group id="gFooter" width="100%">
+			<s:HGroup right="0" verticalCenter="0">
+				<s:Button label="Save"
+						  visible="{model.isDirty}"
+						  click="model.execute(null, PayloadEventKind.SAVE);"/>
+				<s:Button label="Cancel"
+						  click="model.execute(null, PayloadEventKind.CANCEL);"/>
+			</s:HGroup>
+		</s:Group>
+	</s:VGroup>
+</s:Group>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Add -services "../config/services-config.xml" to your compiler to use this configuration. -->
+<services-config>
+    <services>
+        <service-include file-path="remoting-config.xml" />
+    </services>
+    <channels>
+		<!--  RubyAMF Based Endpoints -->
+        <channel-definition id="my-rubyamf" class="mx.messaging.channels.AMFChannel">
+	       <endpoint uri="http://{server.name}:{server.port}/rubyamf/gateway" class="flex.messaging.endpoints.AMFEndpoint"/>
+	   </channel-definition>
+	   <channel-definition id="my-rubyamf-secure" class="mx.messaging.channels.SecureAMFChannel">
+           <endpoint uri="https://{server.name}:{server.port}/rubyamf/gateway" class="flex.messaging.endpoints.SecureAMFEndPoint"/>
+       </channel-definition>
+    </channels>
+</services-config>

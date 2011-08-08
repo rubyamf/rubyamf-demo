@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%" 
+		 tabEnabled="false"
+		 creationComplete="onComplete();">
+
+<!-- Define Script _________________________________________________________ -->     
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.events.DebugEvent;
+	import com.fosrias.library.models.DebugMessage;
+	
+	import mx.core.FlexGlobals;
+    
+    //--------------------------------------------------------------------------
+    //
+    //  Variables
+    //
+    //--------------------------------------------------------------------------
+    
+	/**
+	 * @private
+	 */
+    private var _count:Number = 0;
+	
+	/**
+	 * @private
+	 */
+	private var _messages:String;  
+	
+	/**
+	 * @private
+	 */
+	private var _lastTime:Number;
+    
+    //--------------------------------------------------------------------------
+    //
+    //  Methods
+    //
+    //--------------------------------------------------------------------------
+    
+	/**
+	 * @private
+	 * Adds listener to update debug messages sent to the main application.
+	 */
+	private function onComplete():void
+    {
+		FlexGlobals.topLevelApplication.addEventListener(DebugEvent.SET_MESSAGE, 
+    	setMessage);
+    }
+    
+	/**
+	 * @private
+	 */
+    private function setMessage(event:DebugEvent):void
+    {
+    	var message:DebugMessage = event.message;
+    	var messageTime:Number = message.time.valueOf();
+        if ( chkEvents.selected != message.isEventMessage 
+            && message.isEventMessage )
+            return;
+        
+        if (_messages == null) 
+        {
+        	_count = 1;
+        	message.count = _count;
+            _messages = message.timeStampedMessage;
+            _lastTime = messageTime;
+        } else {
+        	if (messageTime != _lastTime)
+        	{
+        		message.count = 1;
+        		_messages = message.timeLapse(_lastTime) + 
+        		     "\n===============\n" + _messages;
+        		_lastTime = messageTime;
+        		_count = 1;
+        	}
+        	_count += 1;
+            message.count = _count;
+        	_messages =  message.timeStampedMessage + "\n" +  _messages;
+        }
+		taDebug.text = _messages;
+    }
+
+	/**
+	 * @private
+	 * Clears messages in the console.
+	 */
+    private function clearMessages():void 
+    {
+        _messages = null;
+		taDebug.text = _messages;
+    }
+
+]]>
+</fx:Script>
+	
+	<!-- Define GUI ________________________________________________________ -->   
+	<s:TextArea id="taDebug" editable="false" 
+				left="10" top="10" bottom="29" right="10"
+				tabEnabled="false" focusThickness="0"
+				visible="{this.height > 30}"/>
+	<s:Button label="Clear" bottom="00" left="10"
+			  visible="{this.height > 25}"
+			  click="clearMessages();"/>
+	<s:CheckBox id="chkEvents" label="Show Events" bottom="2" left="95"
+				toolTip="Show all manager and view model events"
+			    color="{getStyle('labelColor')}"
+				visible="{this.height > 25}"/>
+</s:Group>

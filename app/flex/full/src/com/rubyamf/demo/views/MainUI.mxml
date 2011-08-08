@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:comps="com.rubyamf.demo.views.components.*"
+		 xmlns:maps="com.rubyamf.demo.maps.*"
+		 xmlns:views="com.rubyamf.demo.views.*" 
+		 xmlns:libViews="com.fosrias.library.views.*"
+		 width="720" 
+		 height="{imgLogo.height + vsMain.height + 100  + /*  TESTING ONLY*/
+		 	20 + debugConsole.height}" 
+		 minHeight="250"
+		 title="Demo Application">
+	
+<fx:Declarations>
+	<!-- Define Effects ___________________________________________________  -->
+	<s:Fade id="fHide" alphaFrom="1" alphaTo="0" duration="250"/>
+	<s:Fade id="fShow" alphaFrom="0" alphaTo="1" duration="250"/>
+</fx:Declarations>
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.views.models.MainViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:MainViewModel;
+
+]]>
+</fx:Script>
+
+<fx:Declarations>
+	
+	<!-- Define Map _______________________________________________________  -->
+	<maps:MainLocalEventMap dispatcher="{this}"/>
+</fx:Declarations>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:VDividedBox right="0" left="0" top="0" bottom="10"
+				    liveDragging="true"
+					horizontalScrollPolicy="off"
+					verticalScrollPolicy="off">
+		<s:Group width="100%" height="100%">
+			<comps:FlashNotice text="{model.notice}" width="100%" top="-20"
+							   textAlign="center"
+							   visible="{model.visible}"/>
+			<mx:LinkButton label="{model.hasSession ? 'Logout' : 'Login'}" 
+						   top="-26"
+						   right="10"
+						   paddingRight="0"
+						   paddingLeft="0"
+						   skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+						   styleName="sessionLink"
+						   visible="{!suiSession.model.visible}"
+						   click="suiSession.model.execute();"/>
+			<s:HGroup id="hgHeader" left="10" top="10" 
+					  gap="20"
+					  verticalAlign="middle">
+				<s:BorderContainer width="100%" height="{imgLogo.height}"
+								   backgroundColor="#000000"
+								   borderColor="#000000"
+								   cornerRadius="5">
+					<mx:Image id="imgLogo" 
+							  source="@Embed(source='assets/images/gateway.png')"/>
+				</s:BorderContainer>
+				<s:ButtonBar id="bbMain" dataProvider="{vsMain}"/>
+			</s:HGroup>
+			<comps:BreadcrumbLink id="blBack" gap="2"
+					  verticalAlign="middle" horizontalAlign="right" 
+					  top="10" right="10"
+					  breadcrumbs="{model.breadcrumbs}"
+					  model="{model}"
+					  visible="{vsMain.selectedIndex == 1}"/>
+			<mx:ViewStack id="vsMain" left="10" right="10" top="60" 
+						  height="{vsMain.selectedIndex == 0 ? 
+						  	  rtHome.height + lblRepo.height : blogsUI.height}"
+						  creationPolicy="all">
+				<s:NavigatorContent label="Home" width="100%"
+									showEffect="fshow">
+					<s:VGroup width="100%">
+						<s:RichEditableText id="rtHome" width="100%"
+											editable="false"
+											text="This RubyAMF demo application highlights the following client-side features:&#xd;&#xd;   1. AMF credentials.&#xd;   2. RemoteObject service calls to a Ruby on Rails backend.&#xd;   3. Remote class aliasing of mapped classes.&#xd;   4. Mate MVC framework.&#xd;&#xd;Further, the application highlights the following server-side features:&#xd;&#xd;   1. Controller parameter mapping in routes.rb.&#xd;   2. In-model class mapping with scopes and methods.&#xd;   3. Configuration in both application.rb and legacy configuration and mapping in rubyamf_config.rb.&#xd;   4. Authlogic authentication.&#xd;&#xd;You can navigate and read blogs without logging in. However, you must login to create new blogs and posts. Both the Login and Password are 'demo.'&#xd;&#xd;The README in the Rails and Flex source code discuss the application architecture, which can be found at:"/>
+						<mx:LinkButton id="lblRepo"
+									   label="https://github.com/rubyamf/rubyamf-demo" 
+									   textDecoration="underline"
+									   paddingLeft="10" paddingRight="0"
+									   skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+									   click="navigateToURL( new URLRequest(
+									   'https://github.com/rubyamf/rubyamf-demo'), '_blank');"/>
+						
+					</s:VGroup>
+				</s:NavigatorContent>
+				<s:NavigatorContent label="Blog Demo" width="100%"
+									showEffect="fshow">
+					<views:BlogsUI id="blogsUI" width="100%"/>
+				</s:NavigatorContent>
+			</mx:ViewStack>
+			<s:HGroup left="10" right="10" bottom="10" 
+					  horizontalAlign="center" verticalAlign="middle">
+				<mx:LinkButton label="Home" paddingLeft="0" paddingRight="0"
+							   skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+							   click="vsMain.selectedIndex = 0;"/>
+				<s:Label text="|"/>
+				<mx:LinkButton label="Blog Demo" paddingLeft="0" paddingRight="0"
+							   skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+							   click="vsMain.selectedIndex = 1;"/>
+				<s:Label text="|"/>
+				<mx:LinkButton label="Contact" paddingLeft="0" paddingRight="0"
+							   skin="com.rubyamf.demo.views.skins.UnfilledLinkButton"
+							   click="navigateToURL( new URLRequest(
+							   'mailto:rubyamf+demo@googlegroups.com'), '_self');"/>
+			</s:HGroup>
+			<comps:SessionUI id="suiSession" right="10" top="-20" 
+							 visible="false"/>
+		</s:Group>
+		
+		<!-- TESTING ONLY: Remove during production. -->
+		<libViews:DebugConsole id="debugConsole"
+								width="100%" height="0"/>
+	</mx:VDividedBox>
+</s:Panel>

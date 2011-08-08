@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:views="com.rubyamf.demo.views.*"
+		 xmlns:comps="com.rubyamf.demo.views.components.*"
+		 height="{vsBlog.height}">
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.models.BlogsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:BlogsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function updateHeight():void
+	{
+		height = vsBlog.selectedIndex == 0 ? ebBlog.height : hgShowBlog.height;
+	}
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:ViewStack id="vsBlog" width="100%"
+				  updateComplete="updateHeight();"
+				  selectedIndex="{model.action != null ? 0 : 1}"
+				  creationPolicy="all">
+		<s:NavigatorContent width="100%">
+			<comps:EditBlog id="ebBlog" width="100%" model="{model}"
+						    updateComplete="updateHeight();"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="500">
+			<s:HGroup id="hgShowBlog" width="100%" top="0" 
+					  height="{vgBody.height > vgSidebar.height ? vgBody.height :
+					  vgSidebar.height}">
+				<s:VGroup id="vgBody" width="100%" height="{lblTitle.height + 
+						  rtDetail.height + postsUI.height + 20}"
+						  updateComplete="updateHeight();">
+					<s:Group width="100%" height="{lblTitle.height}">
+						<s:Label id="lblTitle" text="{model.selectedBlog.title}"
+								 left="0"
+								 verticalCenter="0"
+								 styleName="listTitle"/>
+						<comps:ActionButtons right="0" verticalCenter="0"
+											 enabled="{!model.hasEditLock}"
+											 includeInLayout="{model.isEditable}"
+											 visible="{model.isEditable}"
+											 deleteToolTip="{model.deleteToolTip}"
+											 editToolTip="{model.editToolTip}"
+											 delete="model.execute(
+											 	 model.selectedBlog,
+											 	 PayloadEventKind.DELETE, event)"
+											 edit="model.execute(
+											 	 model.selectedBlog, 
+											 	 PayloadEventKind.EDIT, event);"/>
+					</s:Group>
+					<s:RichText id="rtDetail" text="{model.selectedBlog.detail}" 
+								width="100%"/>
+					<views:PostsUI id="postsUI" width="100%"
+								   resize="updateHeight();"/>
+				</s:VGroup>
+				<s:VGroup id="vgSidebar" width="100" horizontalAlign="center">
+					<mx:Image width="100" height="100"
+							 source="{model.image}"
+							 smoothBitmapContent="true"/>
+					<s:Label id="lblAuthor" text="{model.selectedBlog.author}"/>
+					<s:RichText text="{model.selectedBlog.bio}"
+								resize="updateHeight();"/>
+				</s:VGroup>
+			</s:HGroup>
+		</s:NavigatorContent>
+	</mx:ViewStack>
+</s:Group>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  gap="2">
+
+	<!-- Define Metadata ___________________________________________________ -->	
+<fx:Metadata>
+	/**
+	* Name of the CSS Style declaration to use for the styles for link labels.
+	*/
+	[Style(name="linkStyleName", type="String", inherit="no")]
+</fx:Metadata>
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.views.models.interfaces.AViewModel;
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.skins.UnfilledLinkButton;
+	
+	import mx.controls.LinkButton;
+	
+	import spark.components.Label;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  breadcrumbs
+	//----------------------------------
+	
+	/**
+	 * Sets the breadcrumbs to be displayed.
+	 */
+	public function set breadcrumbs(value:Array):void
+	{
+		removeAllElements();
+		for each (var label:String in value)
+		{
+			var spacer:Label = new Label();
+			spacer.text = "<";
+			
+			addElement(spacer);
+			var link:LinkButton = new LinkButton();
+			link.name = label;
+			link.addEventListener(MouseEvent.CLICK, clickHandler, false, 0,
+				true);
+			link.styleName = getStyle("linkStyleName"); 
+			link.label = label;
+			link.setStyle("paddingBottom", 0);
+			link.setStyle("paddingLeft", 0);
+			link.setStyle("paddingRight", 0);
+			link.setStyle("paddingTop", 0);
+			link.setStyle("skin", UnfilledLinkButton);
+				
+			addElement(link);
+		}
+	}
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	/**
+	 * The presentation view model associated with the link.
+	 */
+	public var model:AViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function clickHandler(event:Event):void
+	{
+		if (model != null)
+		{
+			model.execute(event.target.name, PayloadEventKind.LINK);
+			
+		} else {
+			
+			throw new IllegalOperationError("No model property defined" +
+				" for BreakcrumbLink");
+		}
+	}
+]]>
+</fx:Script>
+</s:HGroup>

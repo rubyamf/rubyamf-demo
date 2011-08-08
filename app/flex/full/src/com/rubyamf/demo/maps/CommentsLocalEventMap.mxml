@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<LocalEventMap 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+    xmlns="http://mate.asfusion.com/"
+	xmlns:business="com.rubyamf.demo.business.*"
+    cache="global">
+    
+    <!-- Script ____________________________________________________________ -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.business.RemoteService;
+	import com.rubyamf.demo.events.PayloadEvent;
+	import com.rubyamf.demo.managers.BlogsManager;
+	import com.rubyamf.demo.managers.CommentsManager;
+	import com.rubyamf.demo.managers.PostsManager;
+	import com.rubyamf.demo.views.CommentsUI;
+	import com.rubyamf.demo.views.models.CommentsViewModel;
+	
+	import mx.events.FlexEvent;
+	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	
+	<!-- Services __________________________________________________________ -->
+	<business:Services id="services"/>
+	
+	<!-- FlexEvent.PREINITIALIZE ___________________________________________ --> 
+	<EventHandlers type="{FlexEvent.PREINITIALIZE}" debug="true">
+		<ObjectBuilder generator="{CommentsManager}">
+			<Properties dispatcher="{scope.dispatcher}"/>
+		</ObjectBuilder>
+		<ObjectBuilder generator="{BlogsManager}"/>
+		<ObjectBuilder generator="{PostsManager}"/>
+	</EventHandlers> 
+	
+	<!-- PayloadEvent.CALL _________________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.CALL}" debug="true">
+		<AsyncMethodInvoker generator="{RemoteService}"
+							method="call"
+							cache="local"
+							arguments="{event.data}"
+							successType="{ResultEvent.RESULT}"
+							faultType="{FaultEvent.FAULT}" 
+							debug="true">
+			<Properties service="{services.commentsService}"/>
+			<Properties showBusyCursor="{true}"/>
+			<successHandlers>
+				<MethodInvoker generator="{CommentsManager}"
+							   method="callResult"
+							   arguments="{currentEvent}"/>
+			</successHandlers>
+			<faultHandlers >
+				<MethodInvoker generator="{CommentsManager}"
+							   method="callFault" 
+							   arguments="{currentEvent}"/>
+			</faultHandlers>
+		</AsyncMethodInvoker>
+	</EventHandlers>
+	
+	<!-- PayloadEventType.EXECUTE __________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.EXECUTE}" debug="true" priority="2">
+		<MethodInvoker generator="{CommentsManager}"
+					   method="execute"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEventType.SHOW_BLOG ________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.SHOW_BLOG}" debug="true"
+				   dispatcherType="global">
+		<MethodInvoker generator="{CommentsManager}"
+					   method="showBlog"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- PayloadEvent.SHOW_POST ____________________________________________ -->   
+	<EventHandlers type="{PayloadEvent.SHOW_POST}" debug="true"
+				   dispatcherType="global">
+		<MethodInvoker generator="{CommentsManager}"
+					   method="showPost"
+					   arguments="{event}"/>
+	</EventHandlers>
+	
+	<!-- View Injectors ____________________________________________________ -->
+	<Injectors target="{CommentsUI}" debug="true">
+		<ObjectBuilder generator="{CommentsViewModel}"  
+					   registerTarget="true"/>
+		<PropertyInjector targetKey="model" 
+						  source="{lastReturn}"/>
+	</Injectors>
+	
+	<!-- View Model Injectors ______________________________________________ -->
+	<Injectors target="{CommentsViewModel}" debug="true">
+		<PropertyInjector targetKey="dispatcher"
+						  source="{scope.dispatcher}"/>
+		<PropertyInjector targetKey="isDeletable"
+						  source="{PostsManager}"
+						  sourceKey="modelIsDeletable"/>
+		<PropertyInjector targetKey="selectedBlog"
+						  source="{BlogsManager}"
+						  sourceKey="modelSelectedBlog"/>
+		<PropertyInjector targetKey="selectedPost"
+						  source="{PostsManager}"
+						  sourceKey="modelSelectedPost"/>
+		<PropertyInjector targetKey="viewIndex"
+						  source="{PostsManager}"
+						  sourceKey="modelViewIndex"/>
+	</Injectors> 
+</fx:Declarations>
+	
+</LocalEventMap>

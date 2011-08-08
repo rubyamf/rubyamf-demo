@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:views="com.rubyamf.demo.views.*"
+		 xmlns:comps="com.rubyamf.demo.views.components.*"
+		 render="updateHeight();">
+	
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.events.PayloadEventKind;
+	import com.rubyamf.demo.views.models.BlogsViewModel;
+	import com.rubyamf.demo.views.models.PostsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:PostsViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 * @private
+	 */
+	private function updateHeight():void
+	{
+		height = vsPost.selectedIndex == 0 ? ebPost.height : 
+			vgBody.height + (model.hasSession ? 0 : 10);
+	}
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<mx:ViewStack id="vsPost" width="100%"
+				  updateComplete="updateHeight();"
+				  selectedIndex="{model.action != null ? 0 : 1}"
+				  creationPolicy="all">
+		<s:NavigatorContent width="100%">
+			<comps:EditPost id="ebPost" width="100%" model="{model}"
+							updateComplete="updateHeight();"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%">
+			<s:VGroup id="vgBody" width="100%" 
+					  top="0"
+					  height="{lblTitle.height + 
+					  rtDetail.height + commentsUI.height}"
+					  updateComplete="updateHeight();">
+				<s:Group width="100%" height="{lblTitle.height}">
+					<s:Label id="lblTitle" text="{model.selectedPost.title}"
+							 left="0"
+							 verticalCenter="0"
+							 styleName="postTitle"/>
+					<comps:ActionButtons right="0" verticalCenter="0"
+										 enabled="{!model.hasEditLock}"
+										 includeInLayout="{model.isEditable}"
+										 visible="{model.isEditable}"
+										 deleteToolTip="{model.deleteToolTip}"
+										 editToolTip="{model.editToolTip}"
+										 delete="model.execute(
+										 model.selectedPost,
+										 PayloadEventKind.DELETE)"
+										 edit="model.execute(
+										 model.selectedPost, 
+										 PayloadEventKind.EDIT);"/>
+				</s:Group>
+				<s:RichText id="rtDetail" text="{model.selectedPost.detail}" 
+							width="100%"/>
+				<views:CommentsUI id="commentsUI" width="100%"
+								  paddingLeft="15"
+								  resize="updateHeight();"/>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:ViewStack>
+</s:Group>

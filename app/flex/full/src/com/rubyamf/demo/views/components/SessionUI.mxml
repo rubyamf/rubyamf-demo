@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2011    Mark W. Foster    www.fosrias.com
+//  All Rights Reserved.
+//
+//  NOTICE: Mark W. Foster permits you to use, modify, and distribute this file
+//  in accordance with the terms of the MIT license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:maps="com.rubyamf.demo.maps.*"
+			   width="210" height="135"
+			   cornerRadius="5"
+			   backgroundColor="#333333"
+			   title="Login"
+			   visible="{model.visible}"
+			   close="model.execute();"
+			   mouseDownOutside="model.execute();"
+			   show="tiLogin.setFocus();">
+
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.rubyamf.demo.views.models.UserSessionsViewModel;
+	import com.rubyamf.demo.vos.SessionToken;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model.
+	 */
+	public var model:UserSessionsViewModel;	
+]]>
+</fx:Script>
+	
+<fx:Declarations>
+	
+	<!-- Define Map _______________________________________________________  -->
+	<maps:UserSessionsLocalEventMap dispatcher="{this}"/>
+</fx:Declarations>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<s:Label text="Username" top="16" left="10"/>
+	<s:TextInput id="tiLogin" text="demo" right="10" left="75" top="10" enabled="true"/>
+	<s:Label text="Password" left="9" top="46"/>
+	<s:TextInput id="tiPassword" y="40" right="10" left="75"
+				 displayAsPassword="true"
+				 text="demo" enabled="true"/>
+	<s:Button id="btnGo" label="Go" width="40" right="10" bottom="10"
+			  enabled="{tiLogin.text.length > 0 &amp;&amp;
+			  tiPassword.text.length > 0}"
+			  click="model.execute( new SessionToken(tiLogin.text, 
+			  tiPassword.text) );/*  tiLogin.text = null;
+			  tiPassword.text = null; */"/>
+</s:TitleWindow>

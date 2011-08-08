@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:DataGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			 xmlns:s="library://ns.adobe.com/flex/spark" 
+			 xmlns:mx="library://ns.adobe.com/flex/mx">
+
+	<!-- Define Script ____________________________________________________  -->
+<fx:Script>
+<![CDATA[
+	import com.fosrias.library.views.models.interfaces.AViewModel;
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  model
+	//----------------------------------
+	
+	[Bindable]
+	/**
+	 * The presentation view model model containing session information.
+	 */
+	public var model:AViewModel;
+	
+]]>
+</fx:Script>
+	
+	<!-- Define GUI _______________________________________________________  -->
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+</s:DataGroup>
