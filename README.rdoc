@@ -1,6 +1,6 @@
 == DESCRIPTION:
 
-Demonstrates the configuration of RubyAMF 2.0 in a Ruby on Rails application and an associated Flex application.
+Demonstrates the configuration of {RubyAMF 2.0}[https://github.com/rubyamf/rubyamf] in a Ruby on Rails application and an associated Flex application.
 
 A live version of the application can be found {here}[http://rubyamf.fosrias.com].
 
